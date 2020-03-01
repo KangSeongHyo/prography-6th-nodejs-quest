@@ -1,0 +1,11 @@
+CREATE TABLE TODOLIST(
+	ID int AUTO_INCREMENT,
+	TITLE varchar(255) NOT NULL,
+	CONTENT varchar(255),
+	DESCRIPTION varchar (255),
+	TAG varchar(255),
+	ISCOMPLETED bool,
+	CREATEDAT timestamp,
+	UPDATEDAT varchar(255),
+	PRIMARY KEY (ID)
+);
