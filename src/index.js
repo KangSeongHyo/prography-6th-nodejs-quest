@@ -8,4 +8,4 @@ app.listen(PORT, HOST, (err) => {
     console.error(err);
   }
   console.log(`server is running on ${HOST}:${PORT}`);
-})
+});

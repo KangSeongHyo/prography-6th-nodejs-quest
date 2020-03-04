@@ -1,11 +1,10 @@
-CREATE TABLE TODOLIST(
-	ID int AUTO_INCREMENT,
-	TITLE varchar(255) NOT NULL,
-	CONTENT varchar(255),
-	DESCRIPTION varchar (255),
-	TAG varchar(255),
-	ISCOMPLETED bool,
-	CREATEDAT timestamp,
-	UPDATEDAT varchar(255),
-	PRIMARY KEY (ID)
+CREATE TABLE TodoList(
+	id int AUTO_INCREMENT,
+	title varchar(255) NOT NULL,
+	description varchar (255) NOT NULL,
+	isCompleted boolean default false,
+	tags varchar(255),
+	createdAt datetime default CURRENT_TIMESTAMP,
+	updatedAt datetime default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (id)
 );
