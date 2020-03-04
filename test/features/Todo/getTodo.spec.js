@@ -20,4 +20,4 @@ describe('testTodo', () => {
       'updatedAt',
     ]))
   })
-})
+});

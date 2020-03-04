@@ -6,7 +6,8 @@ const testClient = supertest(app);
 describe('testTodo', () => {
   test('completeTodo', async () => {
     const res = await testClient
-      .put(`/todos/${process.env.TEST_TODO_ID}/complete`);
+      .put(`/todos/${process.env.TEST_TODO_ID}/complete`)
+      //.put(`/todos/1/complete`);
     expect(res.status).toBe(200);
     expect(res.body.isCompleted).toBe(true);
   })
