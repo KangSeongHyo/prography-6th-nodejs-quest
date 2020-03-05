@@ -10,7 +10,7 @@ describe('testTodo', () => {
     }
     const res = await testClient
       //.put(`/todos/${process.env.TEST_TODO_ID}`)
-      .put(`/todos/1`)
+      .put(`/todos/6`)
       .send(payload);
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject(payload);

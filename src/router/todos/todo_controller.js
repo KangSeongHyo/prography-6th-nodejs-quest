@@ -1,95 +1,116 @@
 const express = require('express');
-const con = require('../../database/db_config.js');
-
+const models = require('../../models');
 const router = express.Router();
+const SUCCESS = 1;
 
-con.connect(err =>
-                        {if(err)
-                            throw err});
-
-router.post('',(req, res) => {
-
-    if(req.body.tags != undefined){
-        tags = req.body.tags;
-        req.body.tags = req.body.tags.join();
+router.post('',(request, response) => {
+    if(request.body.tags != undefined){
+        request.body.tags = request.body.tags.join();
     }
-    let data = req.body;
-    let sql = "INSERT INTO TodoList SET ?";
 
-    con.query(sql,data,((err, results) => {
-        if(err) {
-            throw err;
-        }
-
-        return res.json(results);
-    }));
+    let data = request.body;
+    models.TodoList.create(data)
+        .then(result =>{
+            if(result.dataValues.tags != undefined){
+                result.dataValues.tags = result.dataValues.tags.split(",");
+            }
+            return response.json(result.dataValues);
+        }).catch(err=>{
+        console.log(err);
+        return response.status(500).send('');
+    });
 });
 
-router.get('',(req, res) => {
-    let sql = "SELECT * FROM TodoList";
+router.get('',(request, response) => {
+    models.TodoList.findAll({raw: true}).then(result => {
+        tag(result);
+        return response.json(result);
+    }).catch(err=>{
+        console.log(err);
+        return response.status(500).send('');
+    });
 
-    con.query(sql,((err, results) => {
-        if(err) {
-            throw err;
-        }
-        res.status(200);
-        return res.json(results);
-    }));
 });
 
-router.get('/:id',(req, res) => {
+router.get('/:id',(request, response) => {
+    let id = request.params.id;
+    models.TodoList.findOne({where:{id:id}})
+                   .then(result => {
+                       if(result == SUCCESS){
+                           return response.json(result.dataValues);
+                       }else{
+                           return response.status(400).send({msg:"유효하지 않은 ID."});
+                       }
 
-    let sql = "SELECT * FROM TodoList WHERE id="+"'"+req.params.id+"'";
+                }).catch(err=>{
+                    console.log(err);
+                    return response.status(400).send({msg:"유효하지 않은 ID."});
+                });
 
-    con.query(sql,((err, results) => {
-        if(err) {
-            throw err;
-        }
-        res.status(200);
-        return res.json(results);
-    }));
 });
 
-router.delete('/:id',(req, res) => {
 
-    let sql = "DELETE FROM TodoList WHERE id="+"'"+req.params.id+"'";
 
-    con.query(sql,((err, results) => {
-        if(err) {
-            throw err;
-        }
-        res.status(200);
-        return res.json(results);
-    }));
+router.put('/:id/complete',(request, response) => {
+    let id = request.params.id;
+    models.TodoList
+          .update({isCompleted:true},{where:{id:id}}).then(result => {
+              return models.TodoList.findOne({where:{id:result}});
+          }).then(result => {
+            return response.json(result.dataValues);
+          }).catch(err=>{
+                console.log(err);
+                return response.status(500).send('');
+          });
 });
 
-router.put('/:id',(req, res) => {
-    if(req.body.tags != undefined){
-        req.body.tags = req.body.tags.join();
+router.put('/:id',(request, response) => {
+    let id = request.params.id;
+    if(request.body.tags != undefined){
+        request.body.tags = request.body.tags.join();
     }
-    let data = req.body;
-    let sql = "UPDATE TodoList SET ? WHERE id="+"'"+req.params.id+"'";
+    let data = request.body;
+    models.TodoList
+        .update(data,{where:{id:id}}).then(result => {
+            if(result == 1){
+                return models.TodoList.findOne({where:{id:id}});
+            }else{
+                return response.status(400).send({msg:"유효하지 않은 ID."});
+            }
+    }).then(result => {
+        return response.json(result.dataValues);
+    }).catch(err=>{
+        console.log(err);
+        return response.status(500).send('');
+    });
 
-    con.query(sql,data,((err, results) => {
-        if(err) {
-            throw err;
-        }
-        res.status(200);
-        return res.json(results);
-    }));
 });
 
-router.put('/:id/complete',(req, res) => {
-    console.log(req.params.id);
-    let sql = "UPDATE TodoList SET isCompleted=true WHERE id="+"'"+req.params.id+"'";
-
-    con.query(sql,((err, results) => {
-        if(err) {
-            throw err;
-        }
-        res.status(200);
-        return res.json(results);
-    }));
+router.delete('/:id',(request, response) => {
+    let id = request.params.id;
+    models.TodoList
+          .destroy({where:{id:id}}).then(result => {
+              let msg = "fail" ;
+              if(result == 1){
+                msg = "success";
+              }
+             return response.json({msg:msg});
+       }).catch(err=>{
+        console.log(err);
+        return response.status(500).send('');
+    });
 });
+
+
+
+
+function tag(result){
+    result.forEach(data =>{
+        if(data.tags != null){
+            data.tags = data.tags.split(",");
+        }
+    });
+}
 
 module.exports = router;
+
